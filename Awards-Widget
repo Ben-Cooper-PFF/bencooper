@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PFF Widget — Awards Card Deck (Circular)</title>
+
+  <style>
+    /* =========================================================
+       PFF Awards Card Deck (overlapping + circular loop)
+       - Same colors/typography vibe as your OL widget
+       - Square cards
+       - Shows center + left + right (always)
+       - Arrows rotate the deck in a circular motion (infinite)
+       - Click card = read article (clear CTA)
+       ========================================================= */
+
+    .pff-awards-deck{
+      --tile-bg:#111A3D;
+      --tile-edge:rgba(0,0,0,0.08);
+      --tile-glow:rgba(0,107,255,0.22);
+      --ink:#fff;
+      --muted:#D6D9E6;
+
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      max-width:100%;
+      box-sizing:border-box;
+      margin:16px 0;
+
+      /* card size (responsive below) */
+      --card:220px;
+    }
+
+    @media (max-width:720px){
+      .pff-awards-deck{ --card:200px; }
+    }
+    @media (max-width:520px){
+      .pff-awards-deck{ --card:180px; }
+    }
+
+    .pff-awards-deck__frame{
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:10px 0 6px;
+      max-width:100%;
+    }
+
+    /* The pile container */
+    .pff-awards-deck__stack{
+      position:relative;
+      width:min(820px, 100%);
+      height:calc(var(--card) + 60px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 54px; /* room for arrows */
+      box-sizing:border-box;
+      overflow:visible;
+    }
+
+    @media (max-width:520px){
+      .pff-awards-deck__stack{
+        padding:0 12px;
+        height:calc(var(--card) + 50px);
+      }
+    }
+
+    /* Cards overlap using JS transforms */
+    .pff-awards-card{
+      position:absolute;
+      width:var(--card);
+      height:var(--card); /* ✅ square */
+      display:grid;
+      grid-template-rows:auto 1fr auto;
+
+      background:var(--tile-bg);
+      color:var(--ink);
+      border-radius:14px;
+      padding:14px 12px;
+      border:1px solid var(--tile-edge);
+      box-shadow:0 1px 8px rgba(0,0,0,.25);
+
+      text-decoration:none;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
+
+      transition:
+        transform .38s cubic-bezier(.2,.8,.2,1),
+        opacity .38s cubic-bezier(.2,.8,.2,1),
+        box-shadow .18s ease,
+        border-color .18s ease;
+      will-change:transform, opacity;
+    }
+
+    .pff-awards-card,
+    .pff-awards-card:hover,
+    .pff-awards-card:focus,
+    .pff-awards-card:active{
+      color:var(--ink);
+      text-decoration:none;
+      outline:none;
+    }
+
+    .pff-awards-card.is-active:hover{
+      border-color:rgba(0,107,255,.45);
+      box-shadow:0 10px 26px var(--tile-glow);
+    }
+
+    .pff-awards-card__title{
+      font-weight:800;
+      letter-spacing:.3px;
+      font-size:15px;
+      line-height:1.15;
+      margin-bottom:10px;
+    }
+
+    .pff-awards-card__winner{
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:6px;
+    }
+
+    .pff-awards-card__name{
+      font-size:20px;
+      font-weight:800;
+      line-height:1.12;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      flex-wrap:wrap;
+    }
+
+    .pff-awards-card__team{
+      color:var(--muted);
+      font-size:14px;
+      font-weight:700;
+      line-height:1.2;
+    }
+
+    /* CTA */
+    .pff-awards-card__cta{
+      margin-top:10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+
+      color:var(--muted);
+      font-size:13px;
+      font-weight:800;
+    }
+
+    .pff-awards-pill{
+      width:max-content;
+      background:#0A1434;
+      border:1px solid var(--tile-edge);
+      padding:4px 10px;
+      border-radius:8px;
+      font-weight:800;
+      font-size:13px;
+      color:#fff;
+      flex-shrink:0;
+    }
+
+    .pff-awards-read{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      white-space:nowrap;
+      opacity:.95;
+    }
+
+    /* Arrows */
+    .pff-awards-arrow{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      width:44px;
+      height:44px;
+      border-radius:14px;
+
+      display:flex;
+      align-items:center;
+      justify-content:center;
+
+      background:#0A1434;
+      border:1px solid var(--tile-edge);
+      box-shadow:0 8px 22px rgba(0,0,0,.28);
+      cursor:pointer;
+
+      color:#fff;
+      transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease, opacity .18s ease;
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
+      z-index:50;
+    }
+
+    .pff-awards-arrow:hover{
+      transform:translateY(-50%) translateY(-1px);
+      border-color:rgba(0,107,255,.45);
+      box-shadow:0 10px 26px var(--tile-glow);
+    }
+
+    .pff-awards-arrow:active{
+      transform:translateY(-50%) scale(.98);
+    }
+
+    .pff-awards-arrow--left{ left:6px; }
+    .pff-awards-arrow--right{ right:6px; }
+
+    /* Hint */
+    .pff-awards-hint{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-top:8px;
+      padding:0 6px;
+      font-weight:800;
+      font-size:12px;
+      color:#444;
+    }
+
+    .pff-awards-hint span{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    @media (prefers-reduced-motion:reduce){
+      .pff-awards-card,
+      .pff-awards-arrow{ transition:none; }
+      .pff-awards-arrow:hover{ transform:translateY(-50%); }
+    }
+  </style>
+</head>
+
+<body style="margin:24px;background:#fff;">
+
+  <div class="pff-awards-deck" aria-label="Football Awards">
+    <div class="pff-awards-deck__frame">
+
+      <button class="pff-awards-arrow pff-awards-arrow--left" type="button" aria-label="Previous award">
+        ‹
+      </button>
+
+      <div class="pff-awards-deck__stack" data-awards-stack>
+        <!-- Replace href/title/winner/team with your real data -->
+        <a class="pff-awards-card" href="#" target="_blank" rel="noopener" data-award-card>
+          <div class="pff-awards-card__title">Most Valuable Player</div>
+          <div class="pff-awards-card__winner">
+            <div class="pff-awards-card__name">Lamar Jackson ⧉</div>
+            <div class="pff-awards-card__team">Baltimore Ravens</div>
+          </div>
+          <div class="pff-awards-card__cta">
+            <span class="pff-awards-pill">Award</span>
+            <span class="pff-awards-read">Read article →</span>
+          </div>
+        </a>
+
+        <a class="pff-awards-card" href="#" target="_blank" rel="noopener" data-award-card>
+          <div class="pff-awards-card__title">Offensive Player of the Year</div>
+          <div class="pff-awards-card__winner">
+            <div class="pff-awards-card__name">Christian McCaffrey ⧉</div>
+            <div class="pff-awards-card__team">San Francisco 49ers</div>
+          </div>
+          <div class="pff-awards-card__cta">
+            <span class="pff-awards-pill">Award</span>
+            <span class="pff-awards-read">Read article →</span>
+          </div>
+        </a>
+
+        <a class="pff-awards-card" href="#" target="_blank" rel="noopener" data-award-card>
+          <div class="pff-awards-card__title">Defensive Player of the Year</div>
+          <div class="pff-awards-card__winner">
+            <div class="pff-awards-card__name">Myles Garrett ⧉</div>
+            <div class="pff-awards-card__team">Cleveland Browns</div>
+          </div>
+          <div class="pff-awards-card__cta">
+            <span class="pff-awards-pill">Award</span>
+            <span class="pff-awards-read">Read article →</span>
+          </div>
+        </a>
+
+        <a class="pff-awards-card" href="#" target="_blank" rel="noopener" data-award-card>
+          <div class="pff-awards-card__title">Offensive Rookie of the Year</div>
+          <div class="pff-awards-card__winner">
+            <div class="pff-awards-card__name">C.J. Stroud ⧉</div>
+            <div class="pff-awards-card__team">Houston Texans</div>
+          </div>
+          <div class="pff-awards-card__cta">
+            <span class="pff-awards-pill">Award</span>
+            <span class="pff-awards-read">Read article →</span>
+          </div>
+        </a>
+
+        <a class="pff-awards-card" href="#" target="_blank" rel="noopener" data-award-card>
+          <div class="pff-awards-card__title">Coach of the Year</div>
+          <div class="pff-awards-card__winner">
+            <div class="pff-awards-card__name">Kevin Stefanski ⧉</div>
+            <div class="pff-awards-card__team">Cleveland Browns</div>
+          </div>
+          <div class="pff-awards-card__cta">
+            <span class="pff-awards-pill">Award</span>
+            <span class="pff-awards-read">Read article →</span>
+          </div>
+        </a>
+      </div>
+
+      <button class="pff-awards-arrow pff-awards-arrow--right" type="button" aria-label="Next award">
+        ›
+      </button>
+    </div>
+
+    <div class="pff-awards-hint">
+      <span>◀ ▶ Browse the stack</span>
+      <span>Tap a centered card to <strong>read the article</strong> →</span>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const stack = document.querySelector('[data-awards-stack]');
+      const cards = Array.from(document.querySelectorAll('[data-award-card]'));
+      const leftBtn  = document.querySelector('.pff-awards-arrow--left');
+      const rightBtn = document.querySelector('.pff-awards-arrow--right');
+
+      if(!stack || cards.length === 0 || !leftBtn || !rightBtn) return;
+
+      // Current center index
+      let idx = 0;
+
+      // Wrap helper (circular)
+      const wrap = (n, len) => ((n % len) + len) % len;
+
+      // Layout positions relative to the active card.
+      // We always show left (-1), center (0), right (+1), plus faint “back” cards.
+      function layout(direction){
+        const len = cards.length;
+
+        // Small “circular arc” effect: cards rise slightly as they move to sides.
+        // You can tweak these values to exaggerate the circle motion.
+        const xStep = 44;     // % translate step left/right
+        const yArc  = 14;     // px vertical arc height at side
+        const rot   = 5;      // deg rotation step
+        const scaleStep = 0.10;
+
+        // Ensure correct z ordering and visibility.
+        cards.forEach((card, i) => {
+          // Compute shortest signed distance from idx to i (circular)
+          let raw = i - idx;
+          // normalize to [-len/2, len/2]
+          if(raw >  len / 2) raw -= len;
+          if(raw < -len / 2) raw += len;
+
+          const offset = raw;              // negative = left, positive = right
+          const abs = Math.abs(offset);
+
+          // Only keep a few cards “in the pile”
+          const visible = abs <= 2;
+
+          // Arc: center lower, sides slightly up (like a carousel)
+          const y = abs === 0 ? 0 : -(yArc - (abs - 1) * 4);
+
+          // Base transforms
+          const x = offset * xStep;
+          const r = offset * -rot;
+
+          // Scaling: center is largest
+          const s = abs === 0 ? 1 : Math.max(0.82, 1 - abs * scaleStep);
+
+          // Opacity: keep left/right clearly visible
+          const o = abs === 0 ? 1 : (abs === 1 ? 0.82 : 0.45);
+
+          // Z: center on top, then left/right, then back
+          const z = abs === 0 ? 50 : (abs === 1 ? 40 : 30);
+
+          card.style.left = "50%";
+          card.style.top  = "50%";
+
+          // A tiny “directional push” makes the motion feel circular when arrows are clicked
+          // without requiring complex keyframes.
+          // direction: -1 (left click) or +1 (right click) or undefined.
+          const nudge = direction ? (direction * 1.5) : 0;
+
+          card.style.transform =
+            `translate(-50%, -50%)
+             translateX(${x + nudge}%)
+             translateY(${y}px)
+             rotate(${r}deg)
+             scale(${s})`;
+
+          card.style.opacity = visible ? String(o) : "0";
+          card.style.zIndex = String(z);
+
+          // clickability:
+          // - center card navigates to article
+          // - left/right cards bring to center on first click
+          card.style.pointerEvents = (abs <= 1) ? "auto" : "none";
+
+          card.classList.toggle('is-active', abs === 0);
+        });
+      }
+
+      function go(nextIdx, direction){
+        idx = wrap(nextIdx, cards.length);
+        layout(direction);
+      }
+
+      // Circular navigation (infinite)
+      leftBtn.addEventListener('click', () => go(idx - 1, -1));
+      rightBtn.addEventListener('click', () => go(idx + 1, +1));
+
+      // Click left/right card to rotate into center (first click), then read
+      cards.forEach((card, i) => {
+        card.addEventListener('click', (e) => {
+          const len = cards.length;
+
+          // figure signed distance in [-len/2, len/2]
+          let raw = i - idx;
+          if(raw >  len / 2) raw -= len;
+          if(raw < -len / 2) raw += len;
+
+          // Center card: allow navigation
+          if(raw === 0) return;
+
+          // Only allow bringing adjacent cards to center
+          if(Math.abs(raw) === 1){
+            e.preventDefault();
+            go(i, raw > 0 ? +1 : -1);
+          }
+        });
+      });
+
+      // Keyboard support
+      stack.tabIndex = 0;
+      stack.addEventListener('keydown', (e) => {
+        if(e.key === 'ArrowLeft'){ e.preventDefault(); go(idx - 1, -1); }
+        if(e.key === 'ArrowRight'){ e.preventDefault(); go(idx + 1, +1); }
+      });
+
+      // Initial layout
+      layout();
+
+      window.addEventListener('resize', () => layout());
+    })();
+  </script>
+
+</body>
+</html>
