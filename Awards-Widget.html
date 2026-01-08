@@ -3,16 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>PFF Widget — Awards Card Deck (Circular)</title>
+  <title>PFF Widget — Awards Card Deck (Circular, Blank Back Cards)</title>
 
   <style>
     /* =========================================================
        PFF Awards Card Deck (overlapping + circular loop)
-       - Same colors/typography vibe as your OL widget
-       - Square cards
-       - Shows center + left + right (always)
-       - Arrows rotate the deck in a circular motion (infinite)
-       - Click card = read article (clear CTA)
+       - Center card: full info + "Read article →"
+       - Left/Right cards: full info (optional)
+       - Background cards (depth): SOLID + BLANK (no transparency)
+       - Background cards: straight (no rotation / no arc curve)
        ========================================================= */
 
     .pff-awards-deck{
@@ -27,8 +26,7 @@
       box-sizing:border-box;
       margin:16px 0;
 
-      /* card size (responsive below) */
-      --card:220px;
+      --card:220px; /* responsive below */
     }
 
     @media (max-width:720px){
@@ -47,7 +45,6 @@
       max-width:100%;
     }
 
-    /* The pile container */
     .pff-awards-deck__stack{
       position:relative;
       width:min(820px, 100%);
@@ -55,7 +52,7 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:0 54px; /* room for arrows */
+      padding:0 54px;
       box-sizing:border-box;
       overflow:visible;
     }
@@ -67,7 +64,7 @@
       }
     }
 
-    /* Cards overlap using JS transforms */
+    /* Card base */
     .pff-awards-card{
       position:absolute;
       width:var(--card);
@@ -89,10 +86,9 @@
 
       transition:
         transform .38s cubic-bezier(.2,.8,.2,1),
-        opacity .38s cubic-bezier(.2,.8,.2,1),
         box-shadow .18s ease,
         border-color .18s ease;
-      will-change:transform, opacity;
+      will-change:transform;
     }
 
     .pff-awards-card,
@@ -104,11 +100,13 @@
       outline:none;
     }
 
+    /* Only the active card gets the big hover lift */
     .pff-awards-card.is-active:hover{
       border-color:rgba(0,107,255,.45);
       box-shadow:0 10px 26px var(--tile-glow);
     }
 
+    /* Content */
     .pff-awards-card__title{
       font-weight:800;
       letter-spacing:.3px;
@@ -141,7 +139,6 @@
       line-height:1.2;
     }
 
-    /* CTA */
     .pff-awards-card__cta{
       margin-top:10px;
       display:flex;
@@ -173,6 +170,19 @@
       white-space:nowrap;
       opacity:.95;
     }
+
+    /* ✅ Background card behavior:
+       - Solid and fully opaque (no transparency)
+       - Blank content (we hide content with visibility)
+       - Straight alignment (no rotation / no arc)
+    */
+    .pff-awards-card.is-back .pff-awards-card__content{
+      visibility:hidden; /* keeps spacing/layout stable, but hides text */
+    }
+
+    /* If you want *slightly* darker back cards, uncomment:
+      .pff-awards-card.is-back{ background:#0F1736; }
+    */
 
     /* Arrows */
     .pff-awards-arrow{
@@ -225,13 +235,6 @@
       color:#444;
     }
 
-    .pff-awards-hint span{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      flex-wrap:wrap;
-    }
-
     @media (prefers-reduced-motion:reduce){
       .pff-awards-card,
       .pff-awards-arrow{ transition:none; }
@@ -250,66 +253,78 @@
       </button>
 
       <div class="pff-awards-deck__stack" data-awards-stack>
+
         <!-- Replace href/title/winner/team with your real data -->
         <a class="pff-awards-card" href="#" target="_blank" rel="noopener" data-award-card>
-          <div class="pff-awards-card__title">Most Valuable Player</div>
-          <div class="pff-awards-card__winner">
-            <div class="pff-awards-card__name">Lamar Jackson ⧉</div>
-            <div class="pff-awards-card__team">Baltimore Ravens</div>
-          </div>
-          <div class="pff-awards-card__cta">
-            <span class="pff-awards-pill">Award</span>
-            <span class="pff-awards-read">Read article →</span>
-          </div>
-        </a>
-
-        <a class="pff-awards-card" href="#" target="_blank" rel="noopener" data-award-card>
-          <div class="pff-awards-card__title">Offensive Player of the Year</div>
-          <div class="pff-awards-card__winner">
-            <div class="pff-awards-card__name">Christian McCaffrey ⧉</div>
-            <div class="pff-awards-card__team">San Francisco 49ers</div>
-          </div>
-          <div class="pff-awards-card__cta">
-            <span class="pff-awards-pill">Award</span>
-            <span class="pff-awards-read">Read article →</span>
+          <div class="pff-awards-card__content">
+            <div class="pff-awards-card__title">Most Valuable Player</div>
+            <div class="pff-awards-card__winner">
+              <div class="pff-awards-card__name">Lamar Jackson ⧉</div>
+              <div class="pff-awards-card__team">Baltimore Ravens</div>
+            </div>
+            <div class="pff-awards-card__cta">
+              <span class="pff-awards-pill">Award</span>
+              <span class="pff-awards-read">Read article →</span>
+            </div>
           </div>
         </a>
 
         <a class="pff-awards-card" href="#" target="_blank" rel="noopener" data-award-card>
-          <div class="pff-awards-card__title">Defensive Player of the Year</div>
-          <div class="pff-awards-card__winner">
-            <div class="pff-awards-card__name">Myles Garrett ⧉</div>
-            <div class="pff-awards-card__team">Cleveland Browns</div>
-          </div>
-          <div class="pff-awards-card__cta">
-            <span class="pff-awards-pill">Award</span>
-            <span class="pff-awards-read">Read article →</span>
-          </div>
-        </a>
-
-        <a class="pff-awards-card" href="#" target="_blank" rel="noopener" data-award-card>
-          <div class="pff-awards-card__title">Offensive Rookie of the Year</div>
-          <div class="pff-awards-card__winner">
-            <div class="pff-awards-card__name">C.J. Stroud ⧉</div>
-            <div class="pff-awards-card__team">Houston Texans</div>
-          </div>
-          <div class="pff-awards-card__cta">
-            <span class="pff-awards-pill">Award</span>
-            <span class="pff-awards-read">Read article →</span>
+          <div class="pff-awards-card__content">
+            <div class="pff-awards-card__title">Offensive Player of the Year</div>
+            <div class="pff-awards-card__winner">
+              <div class="pff-awards-card__name">Christian McCaffrey ⧉</div>
+              <div class="pff-awards-card__team">San Francisco 49ers</div>
+            </div>
+            <div class="pff-awards-card__cta">
+              <span class="pff-awards-pill">Award</span>
+              <span class="pff-awards-read">Read article →</span>
+            </div>
           </div>
         </a>
 
         <a class="pff-awards-card" href="#" target="_blank" rel="noopener" data-award-card>
-          <div class="pff-awards-card__title">Coach of the Year</div>
-          <div class="pff-awards-card__winner">
-            <div class="pff-awards-card__name">Kevin Stefanski ⧉</div>
-            <div class="pff-awards-card__team">Cleveland Browns</div>
-          </div>
-          <div class="pff-awards-card__cta">
-            <span class="pff-awards-pill">Award</span>
-            <span class="pff-awards-read">Read article →</span>
+          <div class="pff-awards-card__content">
+            <div class="pff-awards-card__title">Defensive Player of the Year</div>
+            <div class="pff-awards-card__winner">
+              <div class="pff-awards-card__name">Myles Garrett ⧉</div>
+              <div class="pff-awards-card__team">Cleveland Browns</div>
+            </div>
+            <div class="pff-awards-card__cta">
+              <span class="pff-awards-pill">Award</span>
+              <span class="pff-awards-read">Read article →</span>
+            </div>
           </div>
         </a>
+
+        <a class="pff-awards-card" href="#" target="_blank" rel="noopener" data-award-card>
+          <div class="pff-awards-card__content">
+            <div class="pff-awards-card__title">Offensive Rookie of the Year</div>
+            <div class="pff-awards-card__winner">
+              <div class="pff-awards-card__name">C.J. Stroud ⧉</div>
+              <div class="pff-awards-card__team">Houston Texans</div>
+            </div>
+            <div class="pff-awards-card__cta">
+              <span class="pff-awards-pill">Award</span>
+              <span class="pff-awards-read">Read article →</span>
+            </div>
+          </div>
+        </a>
+
+        <a class="pff-awards-card" href="#" target="_blank" rel="noopener" data-award-card>
+          <div class="pff-awards-card__content">
+            <div class="pff-awards-card__title">Coach of the Year</div>
+            <div class="pff-awards-card__winner">
+              <div class="pff-awards-card__name">Kevin Stefanski ⧉</div>
+              <div class="pff-awards-card__team">Cleveland Browns</div>
+            </div>
+            <div class="pff-awards-card__cta">
+              <span class="pff-awards-pill">Award</span>
+              <span class="pff-awards-read">Read article →</span>
+            </div>
+          </div>
+        </a>
+
       </div>
 
       <button class="pff-awards-arrow pff-awards-arrow--right" type="button" aria-label="Next award">
@@ -319,7 +334,7 @@
 
     <div class="pff-awards-hint">
       <span>◀ ▶ Browse the stack</span>
-      <span>Tap a centered card to <strong>read the article</strong> →</span>
+      <span>Tap the centered card to <strong>read the article</strong> →</span>
     </div>
   </div>
 
@@ -332,62 +347,65 @@
 
       if(!stack || cards.length === 0 || !leftBtn || !rightBtn) return;
 
-      // Current center index
       let idx = 0;
-
-      // Wrap helper (circular)
       const wrap = (n, len) => ((n % len) + len) % len;
 
-      // Layout positions relative to the active card.
-      // We always show left (-1), center (0), right (+1), plus faint “back” cards.
+      /*
+        NEW behavior:
+        - We still show a left + right card with content (adjacent).
+        - The “background” cards (distance 2) are:
+            ✅ fully opaque
+            ✅ blank (content hidden)
+            ✅ straight (no rotation / no arc)
+      */
       function layout(direction){
         const len = cards.length;
 
-        // Small “circular arc” effect: cards rise slightly as they move to sides.
-        // You can tweak these values to exaggerate the circle motion.
+        // Tuning
         const xStep = 44;     // % translate step left/right
-        const yArc  = 14;     // px vertical arc height at side
-        const rot   = 5;      // deg rotation step
+        const rotAdj = 5;     // rotation ONLY for adjacent cards
         const scaleStep = 0.10;
 
-        // Ensure correct z ordering and visibility.
         cards.forEach((card, i) => {
-          // Compute shortest signed distance from idx to i (circular)
+          // signed circular distance from active index
           let raw = i - idx;
-          // normalize to [-len/2, len/2]
           if(raw >  len / 2) raw -= len;
           if(raw < -len / 2) raw += len;
 
-          const offset = raw;              // negative = left, positive = right
+          const offset = raw;
           const abs = Math.abs(offset);
 
-          // Only keep a few cards “in the pile”
+          // We show: back2, left, center, right, back2
           const visible = abs <= 2;
 
-          // Arc: center lower, sides slightly up (like a carousel)
-          const y = abs === 0 ? 0 : -(yArc - (abs - 1) * 4);
-
-          // Base transforms
+          // Positioning
           const x = offset * xStep;
-          const r = offset * -rot;
 
-          // Scaling: center is largest
+          // ✅ Straight background cards (no arc, no rotation)
+          const isBack = abs === 2;
+
+          // ✅ Adjacent cards can have a subtle rotation, still “pile-like”
+          const r = isBack ? 0 : offset * -rotAdj;
+
+          // ✅ No arc curve for back cards (and minimal for others)
+          const y = isBack ? 0 : (abs === 0 ? 0 : -8);
+
+          // Scaling
           const s = abs === 0 ? 1 : Math.max(0.82, 1 - abs * scaleStep);
 
-          // Opacity: keep left/right clearly visible
-          const o = abs === 0 ? 1 : (abs === 1 ? 0.82 : 0.45);
+          // Opacity:
+          // ✅ back cards stay fully solid (no transparency)
+          // (content hidden instead)
+          const o = 1;
 
-          // Z: center on top, then left/right, then back
-          const z = abs === 0 ? 50 : (abs === 1 ? 40 : 30);
+          // Z-index stack
+          const z = abs === 0 ? 60 : (abs === 1 ? 50 : 40);
+
+          // Small direction nudge makes the movement feel “circular”
+          const nudge = direction ? (direction * 1.5) : 0;
 
           card.style.left = "50%";
           card.style.top  = "50%";
-
-          // A tiny “directional push” makes the motion feel circular when arrows are clicked
-          // without requiring complex keyframes.
-          // direction: -1 (left click) or +1 (right click) or undefined.
-          const nudge = direction ? (direction * 1.5) : 0;
-
           card.style.transform =
             `translate(-50%, -50%)
              translateX(${x + nudge}%)
@@ -398,12 +416,14 @@
           card.style.opacity = visible ? String(o) : "0";
           card.style.zIndex = String(z);
 
-          // clickability:
-          // - center card navigates to article
-          // - left/right cards bring to center on first click
-          card.style.pointerEvents = (abs <= 1) ? "auto" : "none";
-
+          // Classes for styling (active + back/blank)
           card.classList.toggle('is-active', abs === 0);
+          card.classList.toggle('is-back', isBack);
+
+          // Pointer events:
+          // - center, left, right clickable
+          // - back cards NOT clickable (they’re just “deck depth”)
+          card.style.pointerEvents = (abs <= 1) ? "auto" : "none";
         });
       }
 
@@ -412,24 +432,21 @@
         layout(direction);
       }
 
-      // Circular navigation (infinite)
+      // Circular navigation
       leftBtn.addEventListener('click', () => go(idx - 1, -1));
       rightBtn.addEventListener('click', () => go(idx + 1, +1));
 
-      // Click left/right card to rotate into center (first click), then read
+      // Click left/right card to bring it to center first; then click reads article
       cards.forEach((card, i) => {
         card.addEventListener('click', (e) => {
           const len = cards.length;
 
-          // figure signed distance in [-len/2, len/2]
           let raw = i - idx;
           if(raw >  len / 2) raw -= len;
           if(raw < -len / 2) raw += len;
 
-          // Center card: allow navigation
           if(raw === 0) return;
 
-          // Only allow bringing adjacent cards to center
           if(Math.abs(raw) === 1){
             e.preventDefault();
             go(i, raw > 0 ? +1 : -1);
@@ -444,7 +461,7 @@
         if(e.key === 'ArrowRight'){ e.preventDefault(); go(idx + 1, +1); }
       });
 
-      // Initial layout
+      // Initial render
       layout();
 
       window.addEventListener('resize', () => layout());
