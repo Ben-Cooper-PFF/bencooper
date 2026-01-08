@@ -36,6 +36,31 @@
       .pff-awards-deck{ --card:180px; }
     }
 
+    /* ✅ Header */
+.pff-awards-deck__header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin:0 0 10px;
+  padding:0 6px;
+
+  font-weight:900;
+  font-size:18px;
+  letter-spacing:.2px;
+  color:#111;
+}
+
+/* Optional: subtle underline accent */
+.pff-awards-deck__header:after{
+  content:"";
+  flex:1;
+  height:1px;
+  background:rgba(17,26,61,.18);
+  margin-left:14px;
+  border-radius:9999px;
+}
+
     .pff-awards-deck__frame{
       position:relative;
       display:flex;
@@ -220,6 +245,12 @@
 <body style="margin:24px;background:#fff;">
 
   <div class="pff-awards-deck" aria-label="Football Awards">
+
+    <!-- ✅ Widget Header -->
+    <div class="pff-awards-deck__header">
+      Explore More PFF Award Winners
+    </div>
+    
     <div class="pff-awards-deck__frame">
 
       <button class="pff-awards-arrow pff-awards-arrow--left" type="button" aria-label="Previous award">
