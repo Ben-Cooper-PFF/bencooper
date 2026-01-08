@@ -47,6 +47,7 @@
 
     /* ✅ Header */
     .pff-awards-deck__header{
+      text-decoration:none;
       display:flex;
       align-items:center;
       justify-content:space-between;
@@ -57,6 +58,13 @@
       font-weight:900;
       font-size:18px;
       letter-spacing:.2px;
+      color:#111;
+    }
+
+    .pff-awards-deck__header:hover,
+    .pff-awards-deck__header:focus,
+    .pff-awards-deck__header:active{
+      text-decoration:none;
       color:#111;
     }
 
@@ -270,7 +278,9 @@
   <div class="pff-awards-deck" aria-label="Football Awards">
 
     <div class="pff-awards-deck__header">
-      <a href="https://www.pff.com/" target="_blank" rel="noopener">Explore More PFF Award Winners</a>
+      <a class="pff-awards-deck__header" href="https://www.pff.com/" target="_blank" rel="noopener">
+  Explore More PFF Award Winners
+      </a>
     </div>
 
     <div class="pff-awards-deck__frame">
